@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de IMC</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <h1 id="welcome-header">Cargando...</h1>
+    </header>
+
+    <main class="container">
+        <section class="panel">
+            <h2>Registrar Peso (Req 3.1)</h2>
+            <form id="weight-form">
+                <label for="peso">Peso actual (kg):</label>
+                <input type="number" id="peso" step="0.1" required>
+                <button type="submit">Guardar Peso</button>
+            </form>
+        </section>
+
+        <section class="panel">
+            <h2>Tu Estado Actual (Req 4.2)</h2>
+            <div class="imc-display">
+                <span id="imc-value">--.-</span>
+                <span id="imc-description">Cargando...</span>
+            </div>
+
+            <h2>Estadísticas (Req 5)</h2>
+            <ul class="stats-list">
+                <li>Pesajes Totales (5.1): <strong id="stat-count">0</strong></li>
+                <li>Peso Máximo (5.2): <strong id="stat-max">0</strong> kg</li>
+                <li>Peso Mínimo (5.3): <strong id="stat-min">0</strong> kg</li>
+            </ul>
+        </section>
+    </main>
+
+    <div id="user-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Bienvenido</h2>
+            <p>Por favor, introduce tus datos para comenzar.</p>
+            <form id="user-form">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" required>
+
+                <label for="apellidos">Apellidos:</label>
+                <input type="text" id="apellidos" required>
+
+                <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
+                <input type="date" id="fecha_nacimiento" required>
+
+                <label for="talla_m">Talla (en metros, ej: 1.80):</label>
+                <input type="number" id="talla_m" step="0.01" required>
+
+                <button type="submit">Guardar Perfil</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
+
+
