@@ -1,6 +1,7 @@
 import os
 import shutil
 import tempfile
+from pathlib import Path
 
 import pytest
 
@@ -8,26 +9,29 @@ from app import create_app
 from app.database import db
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def app():
-    # Create a temporary instance folder for the SQLite DB used by create_app
     temp_instance_dir = tempfile.mkdtemp(prefix="flask_instance_")
 
     os.environ["FLASK_ENV"] = "testing"
 
-    app = create_app()
+    db_path = Path(temp_instance_dir) / "test_app.db"
 
-    # Point Flask instance path to the temp dir so DB is isolated
+    test_config = {
+        "SQLALCHEMY_DATABASE_URI": f"sqlite:///{db_path}",
+        "TESTING": True,
+    }
+
+    app = create_app(test_config=test_config)
+
     app.instance_path = temp_instance_dir
 
     with app.app_context():
-        # Recreate tables to ensure a clean slate
         db.drop_all()
         db.create_all()
 
     yield app
 
-    # Cleanup temp instance directory
     shutil.rmtree(temp_instance_dir, ignore_errors=True)
 
 
