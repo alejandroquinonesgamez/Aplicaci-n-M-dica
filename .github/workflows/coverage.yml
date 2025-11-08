@@ -11,12 +11,14 @@ permissions:
 
 jobs:
   update-badge:
+    if: ${{ github.actor != 'github-actions[bot]' }}
     runs-on: ubuntu-latest
 
     steps:
       - name: 1. Checkout Repository
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 2. Verify Python Installation and Upgrade pip
@@ -37,6 +39,7 @@ jobs:
       - name: 5. Generate Coverage Badge SVG
         id: coverage
         run: |
+          rm -f coverage.svg
           coverage-badge -o coverage.svg
 
       - name: 6. Insert Badge into README.md
@@ -46,13 +49,7 @@ jobs:
 
       - name: 7. Commit and Push Changes if Badge Updated
         if: success()
-        run: |
-          if [ -n "$(git status --porcelain=v1)" ]; then
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git config user.name "github-actions[bot]"
-            git add README.md coverage.svg
-            git commit -m "ci: Update coverage badge"
-            git push
-          else
-            echo "There are no changes."
-          fi
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'ci: Update coverage badge'
+          file_pattern: README.md coverage.svg
