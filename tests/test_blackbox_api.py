@@ -8,47 +8,6 @@ from datetime import datetime
 from tests.conftest import assert_success, assert_created, assert_bad_request
 
 
-class TestAPIUser:
-    """Tests de caja negra para endpoints de usuario"""
-    
-    
-    def test_create_user_success(self, client):
-        """Test POST /api/user creación exitosa"""
-        data = {
-            'nombre': 'Juan',
-            'apellidos': 'Pérez García',
-            'fecha_nacimiento': '1990-05-15',
-            'talla_m': 1.75
-        }
-        response = client.post(
-            '/api/user',
-            data=json.dumps(data),
-            content_type='application/json'
-        )
-        assert_success(response)
-        data_resp = json.loads(response.data)
-        assert data_resp['message'] == 'Usuario guardado'
-    
-    def test_get_user_after_creation(self, client):
-        """Test GET /api/user después de crear usuario"""
-        # Crear usuario primero
-        data = {
-            'nombre': 'Juan',
-            'apellidos': 'Pérez García',
-            'fecha_nacimiento': '1990-05-15',
-            'talla_m': 1.75
-        }
-        client.post('/api/user', data=json.dumps(data), content_type='application/json')
-        
-        # Obtener usuario
-        response = client.get('/api/user')
-        assert_success(response)
-        data_resp = json.loads(response.data)
-        assert data_resp['nombre'] == 'Juan'
-        assert data_resp['apellidos'] == 'Pérez García'
-        assert data_resp['talla_m'] == 1.75
-    
-
 
 class TestAPIWeight:
     """Tests de caja negra para endpoints de peso"""

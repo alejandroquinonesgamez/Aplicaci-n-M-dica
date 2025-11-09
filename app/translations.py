@@ -19,14 +19,14 @@ ERRORS = {
 
 # Mensajes de éxito
 MESSAGES = {
-    "user_saved": "Usuario guardado",
-    "weight_registered": "Peso registrado",
+    "user_saved": "Usuario Guardado",
+    "weight_registered": "Peso Registrado",
 }
 
 # Descripciones de BMI
 BMI_DESCRIPTIONS = {
-    "underweight": "Bajo peso",
-    "normal": "Peso normal",
+    "underweight": "Peso Bajo",
+    "normal": "Peso Normal",
     "overweight": "Sobrepeso",
     "obese": "Obesidad",
 }
@@ -48,7 +48,7 @@ HTML_TEXTS = {
     "title": "Registro de IMC",
     "welcome_header_loading": "Cargando...",
     "register_weight": "Registrar Peso",
-    "current_weight": "Peso actual (kg):",
+    "current_weight": "Peso Actual (kg):",
     "save_weight": "Guardar Peso",
     "current_status": "Tu Estado Actual",
     "imc_loading": "Cargando...",

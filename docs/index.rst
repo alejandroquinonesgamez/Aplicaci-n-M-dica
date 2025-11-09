@@ -10,6 +10,5 @@ Test
    :hidden:
 
    manual
-   PE-AVL
    requeriments
 
