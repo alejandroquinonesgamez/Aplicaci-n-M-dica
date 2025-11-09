@@ -200,7 +200,9 @@ class TestIMCAPIBlackBox:
         assert_success(response)
         data = response.get_json()
         assert math.isclose(data["imc"], 24.22, abs_tol=0.1)
-        assert data["description"] == "Peso normal"
+        assert "Peso Normal" in data["description"]
+        # Verificar que la descripción no está vacía (se devuelve algo)
+        assert len(data["description"]) > len("Peso Normal")
 
 
 class TestStatsAPIBlackBox:

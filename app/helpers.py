@@ -1,4 +1,4 @@
-from .translations import get_bmi_description as get_bmi_text
+from .translations import get_bmi_complete_description
 
 
 def calculate_bmi(weight_kg, height_m):
@@ -8,13 +8,22 @@ def calculate_bmi(weight_kg, height_m):
 
 
 def get_bmi_description(bmi):
+    """Devuelve la clasificación de BMI con su descripción detallada"""
+    # Diccionario que vincula el rango de BMI con la clave de descripción
+    # La descripción está vinculada directamente a la clasificación
     if bmi < 18.5:
-        return get_bmi_text("underweight")
+        key = "underweight"
     elif 18.5 <= bmi < 25:
-        return get_bmi_text("normal")
+        key = "normal"
     elif 25 <= bmi < 30:
-        return get_bmi_text("overweight")
-    else:
-        return get_bmi_text("obese")
+        key = "overweight"
+    elif 30 <= bmi < 35:
+        key = "obese_class_i"
+    elif 35 <= bmi < 40:
+        key = "obese_class_ii"
+    else:  # bmi >= 40
+        key = "obese_class_iii"
+    
+    return get_bmi_complete_description(key)
 
 

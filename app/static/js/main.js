@@ -6,11 +6,30 @@ function calculateBMI(weight_kg, height_m) {
     return Math.round((weight_kg / (height_m ** 2)) * 10) / 10; // Redondear a 1 decimal
 }
 
+/**
+ * Obtiene la descripción completa de BMI (clasificación + descripción detallada)
+ * Usa un diccionario para vincular directamente el rango de BMI con su descripción
+ * Mantiene consistencia con el backend
+ */
 function getBMIDescription(bmi) {
-    if (bmi < 18.5) return MESSAGES.texts.bmiUnderweight || "Bajo peso";
-    if (bmi < 25) return MESSAGES.texts.bmiNormal || "Peso normal";
-    if (bmi < 30) return MESSAGES.texts.bmiOverweight || "Sobrepeso";
-    return MESSAGES.texts.bmiObese || "Obesidad";
+    // Determinar la clave según el rango de BMI
+    let key;
+    if (bmi < 18.5) {
+        key = 'underweight';
+    } else if (bmi < 25) {
+        key = 'normal';
+    } else if (bmi < 30) {
+        key = 'overweight';
+    } else if (bmi < 35) {
+        key = 'obese_class_i';
+    } else if (bmi < 40) {
+        key = 'obese_class_ii';
+    } else {
+        key = 'obese_class_iii';
+    }
+    
+    // Obtener la descripción del diccionario
+    return MESSAGES.bmiDescriptions[key] || `IMC: ${bmi}`;
 }
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -23,7 +23,7 @@ class TestAPIWeight:
         )
         assert_created(response)
         data_resp = json.loads(response.data)
-        assert data_resp['message'] == 'Peso registrado'
+        assert data_resp['message'] == 'Peso Registrado'
     
     def test_add_weight_multiple(self, client, sample_user):
         """Test múltiples registros de peso"""
@@ -141,7 +141,9 @@ class TestAPIIMC:
         assert data['imc'] > 0
         # IMC = 75 / (1.75^2) = 24.5 (último peso registrado)
         assert data['imc'] == 24.5
-        assert data['description'] == 'Peso normal'
+        assert 'Peso Normal' in data['description']
+        # Verificar que la descripción no está vacía (se devuelve algo)
+        assert len(data['description']) > len('Peso Normal')
 
 
 class TestAPIIndex:

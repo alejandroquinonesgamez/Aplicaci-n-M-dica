@@ -23,20 +23,35 @@ MESSAGES = {
     "weight_registered": "Peso Registrado",
 }
 
-# Descripciones de BMI
+# Descripciones completas de BMI (clasificación + descripción detallada)
+BMI_COMPLETE_DESCRIPTIONS = {
+    "underweight": "Peso Bajo - Tu IMC está por debajo del rango considerado saludable. Es recomendable consultar con un profesional de la salud para evaluar tu situación nutricional.",
+    "normal": "Peso Normal - Tu IMC está dentro del rango considerado saludable. Mantén una alimentación equilibrada y actividad física regular.",
+    "overweight": "Sobrepeso - Tu IMC indica sobrepeso. Se recomienda adoptar hábitos saludables como una dieta balanceada y ejercicio regular. Consulta con un profesional de la salud para un plan personalizado.",
+    "obese_class_i": "Obesidad Clase I - Tu IMC indica obesidad de grado I. Es importante adoptar cambios en el estilo de vida con supervisión médica. Una dieta equilibrada y actividad física regular pueden ayudar a mejorar tu salud.",
+    "obese_class_ii": "Obesidad Clase II - Tu IMC indica obesidad de grado II. Se recomienda consultar urgentemente con un profesional de la salud para desarrollar un plan de tratamiento personalizado que incluya dieta, ejercicio y posiblemente apoyo médico.",
+    "obese_class_iii": "Obesidad Clase III - Tu IMC indica obesidad de grado III (obesidad mórbida). Es fundamental buscar atención médica especializada para desarrollar un plan de tratamiento integral que priorice tu salud y bienestar.",
+}
+
+# Descripciones de BMI (clasificaciones) - mantenido para compatibilidad si se necesita
 BMI_DESCRIPTIONS = {
     "underweight": "Peso Bajo",
     "normal": "Peso Normal",
     "overweight": "Sobrepeso",
-    "obese": "Obesidad",
+    "obese_class_i": "Obesidad Clase I",
+    "obese_class_ii": "Obesidad Clase II",
+    "obese_class_iii": "Obesidad Clase III",
 }
 
 # Textos de días para validación de peso
-DAYS_TEXT = {
-    "same_day": "mismo día",
-    "one_day": "1 día",
-    "multiple_days": "{days} días",
+# Diccionario que vincula directamente el número de días con su texto formateado
+DAYS_TEXT_MAP = {
+    0: "mismo día",
+    1: "1 día",
+    # Para múltiples días, se formatea dinámicamente
 }
+
+DAYS_TEXT_TEMPLATE = "{days} días"
 
 # Otros textos
 TEXTS = {
@@ -79,18 +94,20 @@ def get_message(key):
 
 
 def get_bmi_description(key):
-    """Obtiene la descripción de BMI"""
+    """Obtiene la descripción de BMI (clasificación)"""
     return BMI_DESCRIPTIONS.get(key, key)
+
+
+def get_bmi_complete_description(key):
+    """Obtiene la descripción completa de BMI (clasificación + descripción detallada)"""
+    return BMI_COMPLETE_DESCRIPTIONS.get(key, "")
 
 
 def get_days_text(days):
     """Obtiene el texto de días transcurridos"""
-    if days == 0:
-        return DAYS_TEXT["same_day"]
-    elif days == 1:
-        return DAYS_TEXT["one_day"]
-    else:
-        return DAYS_TEXT["multiple_days"].format(days=days)
+    # La lógica es simple: buscar en el diccionario o usar el template
+    # Los datos (textos) están en el diccionario, no en la lógica
+    return DAYS_TEXT_MAP.get(days, DAYS_TEXT_TEMPLATE.format(days=days))
 
 
 def get_text(key, **kwargs):
