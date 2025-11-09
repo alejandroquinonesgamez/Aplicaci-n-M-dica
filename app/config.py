@@ -23,3 +23,9 @@ SERVER_CONFIG = {
     "host": "0.0.0.0",
 }
 
+# Configuración de idioma
+ACTIVE_LANGUAGE = 'es'
+
+# Lista de idiomas disponibles (códigos de idioma)
+AVAILABLE_LANGUAGES = ['es']
+

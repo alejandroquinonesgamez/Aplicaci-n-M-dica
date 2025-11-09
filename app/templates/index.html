@@ -59,6 +59,19 @@
         </div>
     </div>
 
+    <!-- Sistema de traducciones: cargar archivos de idioma -->
+    {% for lang in available_languages %}
+    <script src="/static/js/translations/{{ lang }}.js"></script>
+    {% endfor %}
+    <!-- Configuración de idioma desde el backend -->
+    <script>
+        window.APP_CONFIG = {
+            activeLanguage: '{{ active_language }}',
+            availableLanguages: {{ available_languages|tojson }}
+        };
+    </script>
+    <!-- Gestor de traducciones -->
+    <script src="/static/js/translations.js"></script>
     <script src="/static/js/messages.js"></script>
     <script src="/static/js/storage.js"></script>
     <script src="/static/js/main.js"></script>

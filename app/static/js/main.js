@@ -9,7 +9,6 @@ function calculateBMI(weight_kg, height_m) {
 /**
  * Obtiene la descripción completa de BMI (clasificación + descripción detallada)
  * Usa un diccionario para vincular directamente el rango de BMI con su descripción
- * Mantiene consistencia con el backend
  */
 function getBMIDescription(bmi) {
     // Determinar la clave según el rango de BMI
