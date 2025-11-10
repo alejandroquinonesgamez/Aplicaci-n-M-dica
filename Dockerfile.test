@@ -1,0 +1,18 @@
+# Dockerfile para ejecutar tests del frontend
+# Usa este Dockerfile si quieres ejecutar los tests en un contenedor Docker
+
+FROM node:18-slim
+
+WORKDIR /app
+
+# Copiar package.json e instalar dependencias
+COPY package.json .
+RUN npm install
+
+# Copiar archivos de tests y código fuente necesario
+COPY tests/frontend/ ./tests/frontend/
+COPY app/static/js/ ./app/static/js/
+
+# Ejecutar tests
+CMD ["npm", "test"]
+

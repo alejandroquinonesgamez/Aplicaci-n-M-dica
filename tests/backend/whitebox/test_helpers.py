@@ -1,6 +1,12 @@
 """
 Tests de CAJA BLANCA para helpers.py
 Prueban la lógica interna de las funciones de cálculo de IMC
+
+NOTA: Estos tests prueban la lógica matemática de las funciones helper,
+no las validaciones de negocio. Las validaciones de límites (peso, altura)
+se prueban en los tests de validación y en los tests de API.
+Las funciones helper están diseñadas para ser "puras" (solo cálculo),
+mientras que las validaciones defensivas están en la capa superior (rutas).
 """
 import pytest
 from app.helpers import calculate_bmi, get_bmi_description
@@ -43,7 +49,13 @@ class TestCalculateBMI:
         assert calculate_bmi(0, 1.75) == 0.0
     
     def test_calculate_bmi_peso_negativo(self):
-        """Test valor límite: peso negativo (caso edge)"""
+        """Test valor límite: peso negativo (caso edge)
+        
+        NOTA: Este test verifica el comportamiento matemático de la función
+        cuando recibe datos inválidos. En producción, las validaciones defensivas
+        en las rutas previenen que estos valores lleguen a la función helper.
+        Este test es útil para probar la robustez de la función helper.
+        """
         # Aunque no debería pasar en producción, probamos el comportamiento
         assert calculate_bmi(-10, 1.75) == -3.3
 

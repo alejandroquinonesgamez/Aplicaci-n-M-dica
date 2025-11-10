@@ -67,7 +67,11 @@ class LocalStorageManager {
     static addWeight(weight) {
         try {
             const weights = this.getWeights();
-            const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+            // Usar fecha simulada si está disponible (para testing)
+            const currentDate = window.DevTools && window.DevTools.getCurrentDate 
+                ? window.DevTools.getCurrentDate() 
+                : new Date();
+            const today = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD
             
             // Eliminar registros del mismo día
             const filteredWeights = weights.filter(w => {
@@ -78,7 +82,7 @@ class LocalStorageManager {
             const newWeight = {
                 id: Date.now(), // ID único basado en timestamp
                 peso_kg: parseFloat(weight.peso_kg),
-                fecha_registro: new Date().toISOString()
+                fecha_registro: currentDate.toISOString()
             };
             filteredWeights.push(newWeight);
             localStorage.setItem(STORAGE_KEYS.WEIGHTS, JSON.stringify(filteredWeights));

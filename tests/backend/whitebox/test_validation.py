@@ -6,7 +6,7 @@ import pytest
 import json
 from datetime import datetime, date, timedelta
 from app.config import VALIDATION_LIMITS
-from tests.conftest import assert_success, assert_created, assert_bad_request, assert_not_found
+from tests.backend.conftest import assert_success, assert_created, assert_bad_request, assert_not_found, client, sample_user
 
 
 class TestBoundaryValuesAPI:

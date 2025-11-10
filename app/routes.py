@@ -125,6 +125,13 @@ def get_current_imc():
     if not last_weight:
         return jsonify({"imc": 0, "description": get_text("no_weight_records")}), 200
 
+    # Validación defensiva: verificar que los datos estén dentro de los límites
+    # antes de calcular el IMC (protege contra datos antiguos o corruptos)
+    if not (VALIDATION_LIMITS["weight_min"] <= last_weight.weight_kg <= VALIDATION_LIMITS["weight_max"]):
+        return jsonify({"error": get_error("weight_out_of_range")}), 400
+    if not (VALIDATION_LIMITS["height_min"] <= user.height_m <= VALIDATION_LIMITS["height_max"]):
+        return jsonify({"error": get_error("height_out_of_range")}), 400
+
     bmi = calculate_bmi(last_weight.weight_kg, user.height_m)
     description = get_bmi_description(bmi)
     return jsonify({"imc": bmi, "description": description})
@@ -145,9 +152,56 @@ def get_stats():
     })
 
 
+@api.route('/weights', methods=['GET'])
+def get_all_weights():
+    """Obtiene todos los registros de peso del usuario"""
+    storage = current_app.storage
+    
+    user = storage.get_user(USER_ID)
+    if not user:
+        return jsonify({"error": get_error("user_not_configured")}), 404
+    
+    # Obtener todas las entradas de peso
+    all_entries = storage.get_all_weight_entries(USER_ID)
+    
+    # Convertir a formato JSON
+    weights_data = [
+        {
+            "id": entry.entry_id,
+            "peso_kg": entry.weight_kg,
+            "fecha_registro": entry.recorded_date.isoformat()
+        }
+        for entry in all_entries
+    ]
+    
+    return jsonify({
+        "weights": weights_data
+    })
+
+
 @api.route('/messages', methods=['GET'])
 def get_messages():
     """Endpoint que devuelve todos los mensajes para el frontend"""
     return jsonify(get_frontend_messages())
+
+
+@api.route('/config', methods=['GET'])
+def get_config():
+    """Endpoint que devuelve las constantes de validación y configuración para el frontend"""
+    from .config import VALIDATION_LIMITS
+    
+    # Convertir fecha a string ISO para JSON
+    config = {
+        "validation_limits": {
+            "height_min": VALIDATION_LIMITS["height_min"],
+            "height_max": VALIDATION_LIMITS["height_max"],
+            "weight_min": VALIDATION_LIMITS["weight_min"],
+            "weight_max": VALIDATION_LIMITS["weight_max"],
+            "birth_date_min": VALIDATION_LIMITS["birth_date_min"].isoformat(),
+            "weight_variation_per_day": VALIDATION_LIMITS["weight_variation_per_day"]
+        }
+    }
+    
+    return jsonify(config)
 
 

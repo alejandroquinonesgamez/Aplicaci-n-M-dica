@@ -70,10 +70,15 @@
             availableLanguages: {{ available_languages|tojson }}
         };
     </script>
+    <!-- Configuración compartida (debe cargarse antes de main.js) -->
+    <script src="/static/js/config.js"></script>
     <!-- Gestor de traducciones -->
     <script src="/static/js/translations.js"></script>
     <script src="/static/js/messages.js"></script>
     <script src="/static/js/storage.js"></script>
+    <script src="/static/js/sync.js"></script>
+    <!-- Herramientas de desarrollo (solo en modo desarrollo) -->
+    <script src="/static/js/dev-tools.js"></script>
     <script src="/static/js/main.js"></script>
 </body>
 </html>

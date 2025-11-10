@@ -31,13 +31,7 @@ function getBMIDescription(bmi) {
     return MESSAGES.bmi_descriptions[key] || `IMC: ${bmi}`;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const dateInput = document.getElementById('fecha_nacimiento');
-    if (dateInput) {
-        const today = new Date().toISOString().split('T')[0];
-        dateInput.setAttribute('max', today);
-    }
-
+document.addEventListener('DOMContentLoaded', async () => {
     const userModal = document.getElementById('user-modal');
     const userForm = document.getElementById('user-form');
     const weightForm = document.getElementById('weight-form');
@@ -48,6 +42,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const statCount = document.getElementById('stat-count');
     const statMax = document.getElementById('stat-max');
     const statMin = document.getElementById('stat-min');
+
+    // Cargar configuración compartida desde el backend
+    await AppConfig.loadConfigFromBackend();
+    
+    // Actualizar límites de inputs HTML con constantes compartidas
+    const limits = AppConfig.getValidationLimits();
+    const tallaInput = document.getElementById('talla_m');
+    if (tallaInput) {
+        tallaInput.setAttribute('min', limits.height_min);
+        tallaInput.setAttribute('max', limits.height_max);
+    }
+    
+    const pesoInput = document.getElementById('peso');
+    if (pesoInput) {
+        pesoInput.setAttribute('min', limits.weight_min);
+        pesoInput.setAttribute('max', limits.weight_max);
+    }
+    
+    const dateInput = document.getElementById('fecha_nacimiento');
+    if (dateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.setAttribute('max', today);
+        dateInput.setAttribute('min', limits.birth_date_min);
+    }
+    
+    // Sincronizar datos del backend al cargar la página
+    try {
+        await SyncManager.syncFromBackend();
+    } catch (error) {
+        console.warn('Error al sincronizar desde backend:', error);
+        // Continuar con datos locales si falla la sincronización
+    }
 
     function loadUser() {
         const user = LocalStorageManager.getUser();
@@ -66,6 +92,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!user || !lastWeight) {
             imcValue.textContent = '0';
             imcDescription.textContent = MESSAGES.texts.no_weight_records || "Sin registros de peso";
+            return;
+        }
+
+        // Validación defensiva: verificar que los datos estén dentro de los límites
+        // antes de calcular el IMC (protege contra datos antiguos o corruptos)
+        const limits = AppConfig.getValidationLimits();
+        if (!AppConfig.validateWeight(lastWeight.peso_kg)) {
+            imcValue.textContent = '0';
+            imcDescription.textContent = MESSAGES.errors.weight_out_of_range || 
+                `Peso fuera de rango: ${lastWeight.peso_kg} kg`;
+            console.warn('Peso fuera de rango al calcular IMC:', lastWeight.peso_kg);
+            return;
+        }
+        if (!AppConfig.validateHeight(user.talla_m)) {
+            imcValue.textContent = '0';
+            imcDescription.textContent = MESSAGES.errors.height_out_of_range || 
+                `Talla fuera de rango: ${user.talla_m} m`;
+            console.warn('Talla fuera de rango al calcular IMC:', user.talla_m);
             return;
         }
 
@@ -89,12 +133,14 @@ document.addEventListener('DOMContentLoaded', () => {
         loadStats();
     }
 
-    userForm.addEventListener('submit', (e) => {
+    userForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const talla_m = parseFloat(document.getElementById('talla_m').value);
-        if (talla_m < 0.4 || talla_m > 2.72) {
-            alert(MESSAGES.errors.height_out_of_range || 'La talla debe estar entre 0.4 y 2.72 metros');
+        const limits = AppConfig.getValidationLimits();
+        if (!AppConfig.validateHeight(talla_m)) {
+            alert(MESSAGES.errors.height_out_of_range || 
+                  `La talla debe estar entre ${limits.height_min} y ${limits.height_max} metros`);
             return;
         }
 
@@ -105,15 +151,28 @@ document.addEventListener('DOMContentLoaded', () => {
             talla_m: talla_m
         };
 
-        if (LocalStorageManager.saveUser(user)) {
-            userModal.style.display = 'none';
-            updateDashboard();
-        } else {
+        // Guardar en localStorage primero
+        if (!LocalStorageManager.saveUser(user)) {
             alert(MESSAGES.errors.save_user || 'Error al guardar usuario');
+            return;
         }
+
+        // Sincronizar con backend
+        try {
+            const synced = await SyncManager.syncUserToBackend(user);
+            if (!synced) {
+                console.warn('Usuario guardado localmente pero no sincronizado con backend');
+            }
+        } catch (error) {
+            console.warn('Error al sincronizar usuario:', error);
+            // Continuar aunque falle la sincronización
+        }
+
+        userModal.style.display = 'none';
+        updateDashboard();
     });
 
-    weightForm.addEventListener('submit', (e) => {
+    weightForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const user = LocalStorageManager.getUser();
@@ -126,12 +185,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const weight_kg = parseFloat(document.getElementById('peso').value);
         if (!weight_kg) return;
 
-        if (weight_kg < 2 || weight_kg > 650) {
-            alert(MESSAGES.errors.weight_out_of_range || 'El peso debe estar entre 2 y 650 kg');
+        const limits = AppConfig.getValidationLimits();
+        if (!AppConfig.validateWeight(weight_kg)) {
+            alert(MESSAGES.errors.weight_out_of_range || 
+                  `El peso debe estar entre ${limits.weight_min} y ${limits.weight_max} kg`);
             return;
         }
 
-        const today = new Date();
+        // Usar fecha simulada si está disponible (para testing)
+        const today = window.DevTools && window.DevTools.getCurrentDate 
+            ? window.DevTools.getCurrentDate() 
+            : new Date();
         const lastWeightDifferentDate = LocalStorageManager.getLastWeightFromDifferentDate(today);
         
         if (lastWeightDifferentDate) {
@@ -139,24 +203,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const daysElapsed = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
             
             // Validar variación respecto al último peso de un día diferente
-            const maxAllowedDifference = daysElapsed * 5;
+            const maxAllowedDifference = AppConfig.getMaxWeightVariation(daysElapsed);
             const weightDifference = Math.abs(weight_kg - lastWeightDifferentDate.peso_kg);
             
             if (weightDifference > maxAllowedDifference) {
+                const limits = AppConfig.getValidationLimits();
                 const errorMsg = typeof MESSAGES.errors.weightVariationExceeded === 'function'
                     ? MESSAGES.errors.weightVariationExceeded(maxAllowedDifference, daysElapsed)
-                    : `La variación de peso no puede ser mayor a ${maxAllowedDifference} kg (${daysElapsed} día(s) x 5 kg/día)`;
+                    : `La variación de peso no puede ser mayor a ${maxAllowedDifference} kg (${daysElapsed} día(s) x ${limits.weight_variation_per_day} kg/día)`;
                 alert(errorMsg);
                 return;
             }
         }
 
+        // Intentar sincronizar con backend primero (para validación del servidor)
+        try {
+            await SyncManager.syncWeightToBackend({ peso_kg: weight_kg });
+            // Si la sincronización fue exitosa, guardar localmente también
         const newWeight = LocalStorageManager.addWeight({ peso_kg: weight_kg });
         if (newWeight) {
             document.getElementById('peso').value = '';
             updateDashboard();
         } else {
             alert(MESSAGES.errors.save_weight || 'Error al guardar peso');
+            }
+        } catch (error) {
+            // Si hay error de validación del backend, mostrar el mensaje
+            alert(error.message || MESSAGES.errors.save_weight || 'Error al guardar peso');
+            return;
         }
     });
 

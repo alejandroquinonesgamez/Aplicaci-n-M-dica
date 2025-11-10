@@ -5,7 +5,7 @@ sin conocer la implementación interna
 """
 import pytest
 import math
-from tests.conftest import assert_success, assert_created, assert_bad_request, assert_not_found
+from tests.backend.conftest import assert_success, assert_created, assert_bad_request, assert_not_found
 
 
 class TestUserAPIBlackBox:

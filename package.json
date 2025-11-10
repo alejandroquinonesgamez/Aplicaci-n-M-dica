@@ -1,0 +1,25 @@
+{
+  "name": "aplicacion-medica",
+  "version": "1.0.0",
+  "description": "Tests para frontend de aplicación médica",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testMatch": [
+      "**/tests/frontend/**/*.test.js"
+    ],
+    "setupFilesAfterEnv": ["<rootDir>/tests/frontend/setup.js"],
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/app/static/js/$1"
+    }
+  }
+}
+

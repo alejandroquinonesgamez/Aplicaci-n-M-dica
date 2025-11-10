@@ -110,6 +110,11 @@ class StorageInterface(ABC):
         """Obtiene el peso mínimo de un usuario"""
         pass
 
+    @abstractmethod
+    def get_all_weight_entries(self, user_id: int) -> list:
+        """Obtiene todas las entradas de peso de un usuario"""
+        pass
+
 
 class MemoryStorage(StorageInterface):
     """Implementación de almacenamiento en memoria"""
@@ -176,6 +181,11 @@ class MemoryStorage(StorageInterface):
         if not user_entries:
             return None
         return min(e.weight_kg for e in user_entries)
+    
+    def get_all_weight_entries(self, user_id: int) -> list:
+        """Obtiene todas las entradas de peso de un usuario, ordenadas por fecha descendente"""
+        user_entries = [e for e in self._weight_entries if e.user_id == user_id]
+        return sorted(user_entries, key=lambda e: e.recorded_date, reverse=True)
 
 
 
